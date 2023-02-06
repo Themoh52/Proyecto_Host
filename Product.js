@@ -18,7 +18,7 @@ class ProductManager {
 //Method used to create new products in the array "Product Manager"//
      addProduct ( { title,description,price,thumbnail,code,stock,id } ){
         const products = JSON.parse(fs.readFileSync(this.path,"utf-8"));
-        (products.length+1) ? id=1 : id++;
+        (products.length===0) ? products.id=1 : products.id++;
         products.push(new Product ({ title,description,price,thumbnail,code,stock,id })); 
         fs.writeFileSync(this.path, JSON.stringify(products));
     }
@@ -30,10 +30,10 @@ class ProductManager {
     }
 
 //Method used to update the product created//
-    updateProduct(productsid){
+    updateProduct(id){
         const products = JSON.parse(fs.readFileSync(this.path, "utf-8")) 
         products.map((Product)=>{
-            if(Product.id===productsid){
+            if(Product.id===id){
                 products.title = Product.title
                 products.description = Product. description
                 products.price = Product.price
@@ -42,7 +42,7 @@ class ProductManager {
                 products.stock = Product.stock
             }
         })
-        console.log(products)
+        console.log("Producto modificado")
     }
 
 //Method used to remove the product created
