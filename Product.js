@@ -16,63 +16,86 @@ class ProductManager {
     }
 
 //Method used to create new products in the array "Product Manager"//
-     addProduct ( { title,description,price,thumbnail,code,stock,id } ){
+     addProduct ( { title,description,price,thumbnail,code,stock } ){
         const products = JSON.parse(fs.readFileSync(this.path,"utf-8"));
-        (products.length===0) ? products.id=1 : products.id++;
-        products.push(new Product ({ title,description,price,thumbnail,code,stock,id })); 
+        const id = products.length + 1;
+        const product = new Product({
+            id,
+            title,
+            description,
+            price,
+            thumbnail,
+            code,
+            stock
+        }
+        );
+        products.push(product); 
         fs.writeFileSync(this.path, JSON.stringify(products));
     }
 
-//Method used to show the array with the product created//
-    showProduct () {
+//Method used to show the array with the products created//
+    showProducts () {
         const products =  JSON.parse(fs.readFileSync(this.path,"utf-8"));
-        (products) ? console.log(products) : console.log("Produto no encontrado")
+        (products) ? console.log(products) : console.log("Produto no encontrado");
     }
 
-//Method used to update the product created//
-    updateProduct(id){
+//Method used to update the product present in the DB, tracking the id of the product//
+    updateProduct(updateProduct){
         const products = JSON.parse(fs.readFileSync(this.path, "utf-8")) 
-        products.map((Product)=>{
-            if(Product.id===id){
-                products.title = Product.title
-                products.description = Product. description
-                products.price = Product.price
-                products.thumbnail = Product.thumbnail
-                products.code = Product.code
-                products.stock = Product.stock
+        products.map((product)=>{
+            if(product.id===updateProduct.id){
+                products.id = products.id;
+                products.title = updateProduct.title;
+                products.description = updateProduct. description;
+                products.price = updateProduct.price;
+                products.thumbnail = updateProduct.thumbnail;
+                products.code = updateProduct.code;
+                products.stock = updateProduct.stock;
+                return console.log("Producto modificado")
             }
-        })
-        console.log("Producto modificado")
+        });
+        return fs.writeFileSync(this.path, JSON.stringify(products));
     }
 
-//Method used to remove the product created
+//Method used to remove the product present in the DB, tracking the id of the product//
     removeProduct(id){
         const products = JSON.parse(fs.readFileSync(this.path, "utf-8"))
-        const found = products.find(product => product.id===id)
-        ((found) && fs.rmSync(this.path)) ? console.log("Producto eliminado") : console.log("Producto no encontrado")
+        const found = products.find((product) => product.id===id)
+        if (found) {
+            const newProducts = products.filter((product) => product.id!==id);
+            console.log("Producto eliminado");
+            return fs.writeFileSync(this.path, JSON.stringify(newProducts) )  
+        } else {
+            console.log("No se encuentra el producto en la BD")
+        }
     }
 }
 
 //Class made to create the products that are inserted in the array "Product Manager"//
 class Product {
-
-    constructor({title,description,price,thumbnail,code,stock}){
+    constructor({id,title,description,price,thumbnail,code,stock}){
+        this.id = id;
         this.title = title;
         this.description = description;
         this.price = price;
         this.thumbnail = thumbnail;
         this.code = code;
         this.stock = stock;
-        (this.code==="" & this.price===NaN & this.stock===NaN) ? new Error ("Producto no ingresado. El stock y el precio deben ser números") : console.log("Producto ingresado");
+        this.code=== "" && this.price===NaN && this.stock===NaN 
+        ? new Error ("Producto no ingresado. El stock y el precio deben ser números"
+            ) 
+        : console.log("Producto ingresado");
     }
 }
 
-//New array//
-const Product1 = new ProductManager()
-Product1.addProduct({title:"Producto 1",description:"Producto de prueba 1",price:25_000,thumbnail:"NA",code:"25A67K",stock:25})
-Product1.showProduct()
-Product1.getProductById()
-Product1.updateProduct({title:"Producto 2",description:"Producto de prueba 2",price:20_000,thumbnail:"NA",code:"304Bk9",stock:10})
+//New array// 
+const productAdm = new ProductManager();
+productAdm.addProduct({title:"Producto 1",description:"Producto de prueba 1",price:25_000,thumbnail:"NA",code:"25A67K",stock:25});
+productAdm.showProducts();
+productAdm.getProductById(1);
+productAdm.updateProduct({id:1,title:"Producto 2",description:"Producto de prueba 2",price:20_000,thumbnail:"NA",code:"304Bk9",stock:10});
+productAdm.removeProduct(1);
+
 
 
 
