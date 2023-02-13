@@ -1,18 +1,22 @@
 //import of the dependencies own of FileSystem//
-const fs = require('fs')
+import fs from "fs"
 
 //Class made to create the Product Manager//
-class ProductManager {
+export class ProductManager {
     
     constructor(){
-        this.path = "Products.json";
-        fs.writeFileSync(this.path,"[]")
+        this.path = "products.json";
     }
 
 //Method used to find the especific product by his id, and show it in case to find it//
     getProductById (id) {
         const products = JSON.parse(fs.readFileSync(this.path, "utf-8"))
-        products.find(product => product.id===id) ?  console.log(products) : console.log("Producto no encontrado")
+        const found = products.find(product => product.id===id)
+        if (found) {
+          console.log(products)  
+        } else {
+            console.log("Producto no encontrado")
+        }  
     }
 
 //Method used to create new products in the array "Product Manager"//
@@ -88,13 +92,7 @@ class Product {
     }
 }
 
-//New array// 
-const productAdm = new ProductManager();
-productAdm.addProduct({title:"Producto 1",description:"Producto de prueba 1",price:25_000,thumbnail:"NA",code:"25A67K",stock:25});
-productAdm.showProducts();
-productAdm.getProductById(1);
-productAdm.updateProduct({id:1,title:"Producto 2",description:"Producto de prueba 2",price:20_000,thumbnail:"NA",code:"304Bk9",stock:10});
-productAdm.removeProduct(1);
+
 
 
 
