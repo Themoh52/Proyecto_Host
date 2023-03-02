@@ -10,9 +10,10 @@ const productadm = new ProductManager();
 //edition of GET pepition applied to show the amount of products of the DB//
 productRouter.get('/',(req,res)=>{
     const limits = req.query.limits;
-    if (limits!=="") {
-        const slice = productadm.showProducts(limits);
-        res.status(200).send(slice);
+    const products = productadm.showProducts(limits);
+    if (limits) {
+        const slice = products.slice(0,limits);
+        res.status(200).json({products:slice});
     } else {
         res.status(200).json({productadm})
     }
@@ -32,7 +33,7 @@ productRouter.get('/:id',(req,res)=>{
 );
 
 //edition of POST petition applied to add new products to the DB//
-productRouter.post('/add',(req,res)=>{
+productRouter.post('/',(req,res)=>{
     const add = req.body;
     const Product = productadm.addProduct(add);
     if (Product) {
@@ -44,10 +45,12 @@ productRouter.post('/add',(req,res)=>{
 )
 
 //edition of PUT petition applied to update a product//
-productRouter.put('/update',(req,res) => {
-    const update = req.body;
-    found = productadm.updateProduct(update)
+productRouter.put('/:id',(req,res) => {
+    const id = req.params.id;
+    const found = productadm.getProductById(id);
     if (found) {
+        const update = req.body;
+        found = productadm.updateProduct(update)
         res.status(200).send('Producto actualizado')
     } else {
         res.status(404).send("No se pudo actualizar el producto")
@@ -56,8 +59,8 @@ productRouter.put('/update',(req,res) => {
 )
 
 //edition of PUT petition applied to delete a product//
-productRouter.delete('/delete/:id',(req,res) => {
-    const id = req.params.id;
+productRouter.delete('/:id',(req,res) => {
+    const id = Number(req.params.id);
     if (id) {
        productadm.removeProduct(id);
        res.status(200).send('Producto eliminado') 

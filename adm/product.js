@@ -9,9 +9,8 @@ export class ProductManager {
     }
 
 //Method used to find the especific product by his id, and show it in case to find it//
-    getProductById (id) {
-        const products = JSON.parse(fs.readFileSync(this.path, "utf-8"));
-        const found = products.find(product => product.id===id);
+    getProductById (pid) {
+        const found = json.find((json) => json.id===pid);
         if (found) {
           return found;  
         } else {
@@ -19,9 +18,19 @@ export class ProductManager {
         }  
     }
 
+    async #readFile(){
+        const products = await fs.readFile(this.path,"utf-8");
+        const json = JSON.parse(products);
+        return json
+    }
+
+    async #writeFile (products) {
+        await fs.writeFileSync(this.path, products);
+    }
+
 //Method used to create new products in the array "Product Manager"//
-     addProduct ( { title,description,price,thumbnail,code,stock,category,status } ){
-        const products = JSON.parse(fs.readFileSync(this.path,"utf-8"));
+     async addProduct ( { title,description,price,thumbnail,code,stock,category,status } ){
+        const products = await this.#readFile();
         const id = products.length + 1;
         const product = new Product({
             id,
@@ -35,46 +44,44 @@ export class ProductManager {
             status
         }
         );
+        console.log(product)
         products.push(product);
-        fs.writeFileSync(this.path, JSON.stringify(products));
+        this.#writeFile(products);
+        return {success:"Producto agregado con éxito", product:product};
     }
 
 //Method used to show the array with the products created//
-    showProducts (limit) {
-        const products =  JSON.parse(fs.readFileSync(this.path,"utf-8"));
-        if (products) {
-          return products.slice(0,limit);  
-        } else {
-            return products;
-        }
+    async showProducts () {
+        const products = await fs.readFile(this.path,"utf-8");
+        return products;
     }
 
 //Method used to update the product present in the DB, tracking the id of the product//
-    updateProduct(updateProduct){
-        const products = JSON.parse(fs.readFileSync(this.path, "utf-8")) 
-        products.map((product)=>{
-            if(product.id===updateProduct.id){
-                products.id = products.id;
-                products.title = updateProduct.title;
-                products.description = updateProduct. description;
-                products.price = updateProduct.price;
-                products.thumbnail = updateProduct.thumbnail;
-                products.code = updateProduct.code;
-                products.stock = updateProduct.stock;
+    async updateProduct(updateProduct){
+        await this.#readFile();
+        json.map((json)=>{
+            if(json.id===updateProduct.id){
+                json.id = json.id;
+                json.title = updateProduct.title;
+                json.description = updateProduct. description;
+                json.price = updateProduct.price;
+                json.thumbnail = updateProduct.thumbnail;
+                json.code = updateProduct.code;
+                json.stock = updateProduct.stock;
                 return alert("Producto modificado")
             }
         });
-        return fs.writeFileSync(this.path, JSON.stringify(products));
+        return await this.#writeFile();
     }
 
 //Method used to remove the product present in the DB, tracking the id of the product//
-    removeProduct(id){
-        const products = JSON.parse(fs.readFileSync(this.path, "utf-8"))
-        const found = products.find((product) => product.id===id)
+    async removeProduct(id){
+        this.#readFile();
+        const found = json.find((json) => json.id===id)
         if (found) {
-            const newProducts = products.filter((product) => product.id!==id);
+            const newProduct= json.filter((json) => json.id!==id);
             console.log("Producto eliminado");
-            return fs.writeFileSync(this.path, JSON.stringify(newProducts) )  
+            return await this.#writeFile();  
         } else {
             console.log("No se encuentra el producto en la BD")
         }
@@ -94,7 +101,7 @@ export class Product {
         this.category = category;
         this.status = true;
         this.title==="" && this.description==="" && this.price===NaN && this.code==="" && this.stock===NaN && this.category==="" && this.status===false  
-        ? new Error ("Producto no ingresado. O no ingresaste todos los datos, o el stock y el precio no son ser números"
+        ? new Error ("Producto no ingresado. O no ingresaste todos los datos, o el stock y el precio no son números"
             ) 
         : console.log("Producto ingresado");
     }
