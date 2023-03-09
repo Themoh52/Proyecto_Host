@@ -6,7 +6,7 @@ import { Server } from "socket.io";
 import { webproductRouter } from "../routes/webProductRouter.js";
 import { webcartRouter } from "../routes/webCartRouter.js";
 import { engine } from "express-handlebars";
-import { ProductManager } from "../adm/product.js";
+import ProductManager  from "../adm/products.js";
 
 
 //Creation of the port used by the server//
@@ -45,16 +45,16 @@ const server = app.listen(port,() => console.log("Servidor activo en el puerto "
 //Connection between the server and Socket.io//
 const io = new Server(server);
 
-io.on('connection', socket=>{
+io.on('connection', async (socket)=>{
 
     console.log("Nuevo usuario conectado")
+    const products = await productAdm.readProducts();
+    io.sockets.emit('update', products)
     io.sockets.emit('message', "Saludos, soy Prueba1, y ahora te presentamos el espacio para agregar productos a nuestra Base de Datos");
 
     socket.on('NewProduct', async (newProduct)=>{
-        productAdm.addProduct(newProduct);
-        console.log(newProduct)
-        const products = await productAdm.showProducts()
-        console.log(products);
+        await productAdm.addProduct(newProduct);
+        const products = await productAdm.readProducts();
         io.sockets.emit('update', products)
     })
 
